@@ -6,7 +6,6 @@
 <script>
 import { onMounted } from 'vue';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';  // Ensure Leaflet CSS is imported
 
 export default {
     name: 'MapComponent',
