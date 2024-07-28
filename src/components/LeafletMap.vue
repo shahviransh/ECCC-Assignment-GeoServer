@@ -27,7 +27,7 @@ export default {
                 layers: 'ECCCGeoServer:basin',
                 format: 'image/png',
                 transparent: true,
-                version: '1.1.0',
+                version: '1.3.0',
                 request: 'GetMap',
                 srs: 'EPSG:4326',
                 styles: '',
