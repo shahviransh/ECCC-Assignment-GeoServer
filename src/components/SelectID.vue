@@ -33,7 +33,7 @@ const emitSelectedID = () => {
 .custom-select {
     position: center;
     width: 200px;
-    padding: 8px;
+    padding: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
     background-color: #333;

@@ -47,26 +47,28 @@ export default {
                 // Define a small bbox around the clicked point
                 const buffer = 1;
                 const bbox = `${x - buffer},${y - buffer},${x + buffer},${y + buffer}`;
-                const url = `http://localhost:9090/geoserver/ECCCGeoServer/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=ECCCGeoServer:subbasin&outputFormat=application/json&BBOX=${bbox}&crs=EPSG:26917`;
+                const url = `http://localhost:9090/geoserver/ECCCGeoServer/wfs?service=WFS&version=1.3.0&request=GetFeature&typename=ECCCGeoServer:subbasin&outputFormat=application/json&BBOX=${bbox}&crs=EPSG:26917`;
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                        // Extract necessary data from the response
-                        const newData = data.features[0].properties;
-                        if (newData.length) {
+                        if (data.features.length > 1) {
+                            const newData = data.features.map(data => data.properties);
                             const featureData = newData.map(data => cleanObject(extractFeatureData(data, 'OBJECTID')));
                             // Assuming featureData includes a list of IDs
                             emit('polygonClicked', {
-                                ids: featureData.map(data => data.Id),
-                                defaultData: featureData // Replace with default chart data
+                                ids: [...new Set(featureData.map(data => data.Id))],
+                                defaultData: featureData, // Replace with default chart data
+                                type: 'line',
                             });
                         } else {
+                            // Extract necessary data from the response
+                            const newData = data.features[0].properties;
                             const featureData = cleanObject(extractFeatureData(newData, 'OBJECTID'));
                             // Assuming featureData includes a list of IDs
-                            const arr = [featureData.Id];
                             emit('polygonClicked', {
-                                ids: arr,
-                                defaultData: featureData // Replace with default chart data
+                                ids: [featureData.Id],
+                                defaultData: featureData, // Replace with default chart data
+                                type: 'pie',
                             });
                         }
                     })

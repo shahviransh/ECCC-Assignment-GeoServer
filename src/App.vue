@@ -5,22 +5,27 @@
 
     <!-- Popup for displaying the chart -->
     <div v-if="popupData" class="popup">
-      <SelectID :ids="popupData.ids" @idSelected="updateChartWithID" />
-      <ChartDisplay :option="chartOptions" />
+      <SelectID class="selectClass" :ids="popupData.ids" @idSelected="updateChartWithID" />
+      <!-- Use the PieChartDisplay component to display the pie chart -->
+      <PieChartDisplay v-if="popupData.type === 'pie'" :option="chartOptions" />
+      <!-- Use the LineChartDisplay component to display the line chart -->
+      <LineChartDisplay v-else :option="chartOptions" />
     </div>
   </div>
 </template>
 
 <script>
 import LeafletMap from './components/LeafletMap.vue'; // Import the LeafletMap component
-import ChartDisplay from './components/ChartDisplay.vue'; // Import the ChartDisplay component
+import PieChartDisplay from './components/PieChartDisplay.vue'; // Import the ChartDisplay component
+import LineChartDisplay from './components/LineChartDisplay.vue'; // Import the ChartDisplay component
 import SelectID from './components/SelectID.vue'; // Import the SelectID component
 
 export default {
   name: 'App',
   components: {
     LeafletMap, // Register the LeafletMap component
-    ChartDisplay, // Register the ChartDisplay component
+    LineChartDisplay, // Register the ChartDisplay component
+    PieChartDisplay, // Register the ChartDisplay component
     SelectID, // Register the SelectID component
   },
   data() {
@@ -34,7 +39,9 @@ export default {
     showPopupWithChart(data) {
       this.popupData = data;
       // Generate chart options based on the fetched data
-      this.chartOptions = this.generateChartOptions(data.defaultData);
+      this.chartOptions = this.popupData.defaultData.length > 1
+        ? this.generateLineChartOptions(this.popupData.defaultData)
+        : this.generatePieChartOptions(this.popupData.defaultData);
     },
     updateChartWithID(id) {
       this.selectedID = id;
@@ -45,16 +52,44 @@ export default {
       // Fetch data for the selected ID and update the chart options
       // If there are multiple IDs, fetch data for each ID and update the chart options
       // Else, fetch data for the single ID and update the chart options
-      if (this.popupData.defaultData.length) {
+      if (this.popupData.defaultData.length > 1) {
         const temp = this.popupData.defaultData.find(data => data.Id === id);
 
-        this.chartOptions = this.generateChartOptions(temp);
+        this.chartOptions = this.generateLineChartOptions(temp);
       }
       else {
-        this.chartOptions = this.generateChartOptions(this.popupData.defaultData);
+        this.chartOptions = this.generatePieChartOptions(this.popupData.defaultData);
       }
     },
-    generateChartOptions(data) {
+    generateLineChartOptions(data) {
+      // Customize the chart options based on the data
+      return {
+        title: {
+          text: 'Polygon Data Chart',
+          left: 'center',
+        },
+        tooltip: {
+          trigger: 'axis',
+          formatter: '{a} <br/>{b} : {c}',
+        },
+        grid: { top: 8, right: 8, bottom: 24, left: 36 },
+        xAxis: {
+          type: 'category',
+          data: Object.values(data).map(data => data.Time),
+        },
+        yAxis: {
+          type: 'value',
+        },
+        series: [
+          {
+            type: 'line',
+            data: Object.values(data).map(data => data.Q_m3),
+            smooth: true,
+          },
+        ],
+      };
+    },
+    generatePieChartOptions(data) {
       // Customize the chart options based on the data
       return {
         title: {
@@ -74,7 +109,7 @@ export default {
             type: 'pie',
             radius: '55%',
             center: ['50%', '60%'],
-            data: Object.entries(this.popupData.defaultData).map(([key, val], index) => ({
+            data: Object.entries(data).map(([key, val], index) => ({
               value: val,
               name: key  // You can customize this as needed
             })),
@@ -111,5 +146,10 @@ export default {
   padding: 10px;
   z-index: 1000;
   /* Ensure popup is above the map */
+}
+
+.selectClass {
+  margin-bottom: 2px;
+  align-content: center;
 }
 </style>
