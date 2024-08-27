@@ -31,7 +31,7 @@ const emitSelectedID = () => {
 
 <style scoped>
 .custom-select {
-    position: center;
+    margin: 0 auto;
     width: 200px;
     padding: 5px;
     border: 1px solid #ccc;

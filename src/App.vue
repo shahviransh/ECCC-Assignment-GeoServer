@@ -4,7 +4,7 @@
     <LeafletMap @polygonClicked="showPopupWithChart" />
 
     <!-- Popup for displaying the chart -->
-    <div v-if="popupData" class="popup">
+    <div v-if="popupData" :class="['popup', { 'wide-popup': isLineChart }]" v-draggable>
       <SelectID class="selectClass" :ids="popupData.ids" @idSelected="updateChartWithID" />
       <!-- Use the PieChartDisplay component to display the pie chart -->
       <PieChartDisplay v-if="popupData.type === 'pie'" :option="chartOptions" />
@@ -19,6 +19,7 @@ import LeafletMap from './components/LeafletMap.vue'; // Import the LeafletMap c
 import PieChartDisplay from './components/PieChartDisplay.vue'; // Import the ChartDisplay component
 import LineChartDisplay from './components/LineChartDisplay.vue'; // Import the ChartDisplay component
 import SelectID from './components/SelectID.vue'; // Import the SelectID component
+import draggable from './directives/draggable.js'; // Import the draggable directive
 
 export default {
   name: 'App',
@@ -28,12 +29,20 @@ export default {
     PieChartDisplay, // Register the ChartDisplay component
     SelectID, // Register the SelectID component
   },
+  directives: {
+    draggable,
+  },
   data() {
     return {
       popupData: null, // Data to be displayed in the popup
       chartOptions: {}, // Options for the chart
       selectedID: null, // Currently selected ID
     };
+  },
+  computed: {
+    isLineChart() {
+      return this.popupData && this.popupData.type !== 'pie';
+    },
   },
   methods: {
     showPopupWithChart(data) {
@@ -107,8 +116,9 @@ export default {
         series: [
           {
             type: 'pie',
-            radius: '55%',
+            radius: ['30%', '55%'], // Inner and outer radius
             center: ['50%', '60%'],
+            roseType: 'area', // This makes the segments have equal angles but vary in radius
             data: Object.entries(data).map(([key, val], index) => ({
               value: val,
               name: key  // You can customize this as needed
@@ -136,20 +146,24 @@ export default {
 }
 
 .popup {
-  position: absolute;
   top: 10px;
-  right: 10px;
+  left: 10px;
   width: 400px;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   padding: 10px;
   z-index: 1000;
-  /* Ensure popup is above the map */
+  transition: width 0.3s ease;
+}
+
+.wide-popup {
+  width: 600px; /* Adjust width for line charts */
 }
 
 .selectClass {
-  margin-bottom: 2px;
-  align-content: center;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
 }
 </style>
