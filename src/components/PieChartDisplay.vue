@@ -12,11 +12,11 @@ import VChart, { THEME_KEY } from 'vue-echarts';
 import { provide } from 'vue';
 
 use([
-  CanvasRenderer,
-  PieChart,
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
+    CanvasRenderer,
+    PieChart,
+    TitleComponent,
+    TooltipComponent,
+    LegendComponent,
 ]);
 
 provide(THEME_KEY, 'dark');

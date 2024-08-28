@@ -51,23 +51,19 @@ export default {
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                        if (data.features.length > 1) {
-                            const newData = data.features.map(data => data.properties);
-                            const featureData = newData.map(data => cleanObject(extractFeatureData(data, 'OBJECTID')));
-                            // Assuming featureData includes a list of IDs
+                        const newData = data.features.map(data => data.properties);
+                        const featureData = newData.map(data => cleanObject(extractFeatureData(data, 'OBJECTID')));
+                        // Assuming featureData includes a list of IDs
+                        if (featureData.length > 1) {
                             emit('polygonClicked', {
-                                ids: [...new Set(featureData.map(data => data.Id))],
+                                ids: null,
                                 defaultData: featureData, // Replace with default chart data
                                 type: 'line',
                             });
                         } else {
-                            // Extract necessary data from the response
-                            const newData = data.features[0].properties;
-                            const featureData = cleanObject(extractFeatureData(newData, 'OBJECTID'));
-                            // Assuming featureData includes a list of IDs
                             emit('polygonClicked', {
-                                ids: [featureData.Id],
-                                defaultData: featureData, // Replace with default chart data
+                                ids: null,
+                                defaultData: featureData[0], // Replace with default chart data
                                 type: 'pie',
                             });
                         }

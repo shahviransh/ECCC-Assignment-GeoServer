@@ -45,30 +45,60 @@ export default {
     },
   },
   methods: {
+    extractFeatureData(data, options) {
+      // Assuming the response contains the necessary DBF data
+      // Customize this to extract and format the needed data
+      return Object.keys(data).filter(objKey =>
+        objKey !== options).reduce((newObj, key) => {
+          newObj[key] = data[key];
+          return newObj;
+        }, {}
+        ) || {};
+    },
+
+    cleanObject(obj) {
+      return Object.fromEntries(
+        Object.entries(obj).filter(([key, value]) => value !== null && value !== '')
+      );
+    },
     showPopupWithChart(data) {
       this.popupData = data;
+      const url = `http://localhost:9090/geoserver/ECCCGeoServer/wfs?service=WFS&version=1.3.0&request=GetFeature&typename=ECCCGeoServer:subbasin&outputFormat=application/json&crs=EPSG:26917`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          this.popupData.ids = [... new Set(data.features.map(data => data.properties.OBJECTID))];
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
       // Generate chart options based on the fetched data
       this.chartOptions = this.popupData.defaultData.length > 1
         ? this.generateLineChartOptions(this.popupData.defaultData)
         : this.generatePieChartOptions(this.popupData.defaultData);
     },
     updateChartWithID(id) {
+      this.chartOptions = null;
       this.selectedID = id;
       // Fetch data for the selected ID and update chart options
       this.fetchDataForID(id);
     },
     fetchDataForID(id) {
       // Fetch data for the selected ID and update the chart options
-      // If there are multiple IDs, fetch data for each ID and update the chart options
-      // Else, fetch data for the single ID and update the chart options
-      if (this.popupData.defaultData.length > 1) {
-        const temp = this.popupData.defaultData.find(data => data.Id === id);
-
-        this.chartOptions = this.generateLineChartOptions(temp);
-      }
-      else {
-        this.chartOptions = this.generatePieChartOptions(this.popupData.defaultData);
-      }
+      const url = `http://localhost:9090/geoserver/ECCCGeoServer/wfs?service=WFS&version=1.3.0&request=GetFeature&typename=ECCCGeoServer:subbasin&outputFormat=application/json&CQL_FILTER=OBJECTID=${id}&crs=EPSG:26917`;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const newData = data.features.map(data => data.properties);
+          this.popupData.defaultData = newData.map(data => this.cleanObject(this.extractFeatureData(data, 'OBJECTID')));
+          this.popupData.type = this.popupData.defaultData.length > 1 ? 'line' : 'pie';
+          this.chartOptions = this.popupData.defaultData.length > 1
+            ? this.generateLineChartOptions(this.popupData.defaultData)
+            : this.generatePieChartOptions(this.popupData.defaultData[0]);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
     },
     generateLineChartOptions(data) {
       // Customize the chart options based on the data
@@ -158,7 +188,8 @@ export default {
 }
 
 .wide-popup {
-  width: 600px; /* Adjust width for line charts */
+  width: 600px;
+  /* Adjust width for line charts */
 }
 
 .selectClass {

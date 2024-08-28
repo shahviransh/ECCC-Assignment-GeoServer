@@ -12,11 +12,11 @@ import VChart, { THEME_KEY } from 'vue-echarts';
 import { provide } from 'vue';
 
 use([
-  CanvasRenderer,
-  LineChart,
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
+    CanvasRenderer,
+    LineChart,
+    TitleComponent,
+    TooltipComponent,
+    GridComponent,
 ]);
 
 provide(THEME_KEY, 'dark');
