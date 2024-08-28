@@ -30,6 +30,7 @@ export default {
     SelectID, // Register the SelectID component
   },
   directives: {
+    // Register the draggable directive
     draggable,
   },
   data() {
@@ -46,8 +47,7 @@ export default {
   },
   methods: {
     extractFeatureData(data, options) {
-      // Assuming the response contains the necessary DBF data
-      // Customize this to extract and format the needed data
+      // Remove the options key from the data object
       return Object.keys(data).filter(objKey =>
         objKey !== options).reduce((newObj, key) => {
           newObj[key] = data[key];
@@ -57,6 +57,7 @@ export default {
     },
 
     cleanObject(obj) {
+      // cleanObject function to remove null and empty values from an object
       return Object.fromEntries(
         Object.entries(obj).filter(([key, value]) => value !== null && value !== '')
       );
@@ -91,6 +92,7 @@ export default {
         .then(data => {
           const newData = data.features.map(data => data.properties);
           this.popupData.defaultData = newData.map(data => this.cleanObject(this.extractFeatureData(data, 'OBJECTID')));
+          // Update the chart type and options based on the fetched data
           this.popupData.type = this.popupData.defaultData.length > 1 ? 'line' : 'pie';
           this.chartOptions = this.popupData.defaultData.length > 1
             ? this.generateLineChartOptions(this.popupData.defaultData)
@@ -151,7 +153,7 @@ export default {
             roseType: 'area', // This makes the segments have equal angles but vary in radius
             data: Object.entries(data).map(([key, val], index) => ({
               value: val,
-              name: key  // You can customize this as needed
+              name: key
             })),
             emphasis: {
               itemStyle: {

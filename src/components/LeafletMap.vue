@@ -15,12 +15,14 @@ export default {
         const map = ref(null);
 
         onMounted(() => {
+            // Define the CRS for the WMS layer
             const crs26917 = new L.Proj.CRS('EPSG:26917',
                 '+proj=utm +zone=17 +datum=NAD83 +units=m +no_defs',
                 {
                     resolutions: [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1],
                 });
 
+            // Convert ESPG:26917 coordinates to EPSG:4326
             const latlng = proj4('EPSG:26917', 'EPSG:4326', [447263.68140, 4829457.64344]);
 
             map.value = L.map('map').setView([latlng[1], latlng[0]], 14);
@@ -29,6 +31,7 @@ export default {
                 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
             }).addTo(map.value);
 
+            // Add the WMS layer
             L.tileLayer.wms('http://localhost:9090/geoserver/ECCCGeoServer/wms', {
                 layers: 'ECCCGeoServer:subbasin',
                 format: 'image/png',
@@ -51,19 +54,21 @@ export default {
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
+                        // Organize the fetched data
                         const newData = data.features.map(data => data.properties);
                         const featureData = newData.map(data => cleanObject(extractFeatureData(data, 'OBJECTID')));
                         // Assuming featureData includes a list of IDs
+                        // Emit the event with the data
                         if (featureData.length > 1) {
                             emit('polygonClicked', {
                                 ids: null,
-                                defaultData: featureData, // Replace with default chart data
+                                defaultData: featureData, // Replace with default chart data for many ids
                                 type: 'line',
                             });
                         } else {
                             emit('polygonClicked', {
                                 ids: null,
-                                defaultData: featureData[0], // Replace with default chart data
+                                defaultData: featureData[0], // Replace with default chart data for a single id
                                 type: 'pie',
                             });
                         }
@@ -72,8 +77,7 @@ export default {
             });
 
             const extractFeatureData = (data, options) => {
-                // Assuming the response contains the necessary DBF data
-                // Customize this to extract and format the needed data
+                // Remove the options key from the data object
                 return Object.keys(data).filter(objKey =>
                     objKey !== options).reduce((newObj, key) => {
                         newObj[key] = data[key];
@@ -83,6 +87,7 @@ export default {
             }
 
             const cleanObject = (obj) => {
+                // cleanObject function to remove null and empty values from an object
                 return Object.fromEntries(
                     Object.entries(obj).filter(([key, value]) => value !== null && value !== '')
                 );
