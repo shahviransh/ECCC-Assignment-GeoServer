@@ -113,13 +113,31 @@ export default {
           trigger: 'axis',
           formatter: '{a} <br/>{b} : {c}',
         },
-        grid: { top: 8, right: 8, bottom: 24, left: 36 },
+        grid: { top: 8, right: 8, bottom: 45, left: 50 },
         xAxis: {
           type: 'category',
           data: Object.values(data).map(data => data.Time),
+          name: 'Time',  // X-axis label
+          nameLocation: 'middle',
+          nameTextStyle: {
+            fontSize: 16,
+            padding: 10,
+          },
+          axisLabel:{
+            fontSize: 14,
+          },
         },
         yAxis: {
           type: 'value',
+          name: 'Runoff',  // Y-axis title
+          nameLocation: 'middle',
+          nameTextStyle: {
+            fontSize: 16,
+            padding: 15,  // Adjust padding for better placement
+          },
+          axisLabel:{
+            fontSize: 14,
+          },
         },
         series: [
           {
